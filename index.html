@@ -5,16 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>영재설문 응답 플랫폼</title>
 <style>
-  :root { --main:#4f46e5; --main-d:#4338ca; --soft:#eef2ff; --line:#e2e8f0; --text:#1e293b; --sub:#64748b; }
+  :root { --main:#4f46e5; --main-d:#4338ca; --soft:#eef2ff; --line:#e2e8f0; --text:#1e293b; --sub:#64748b;
+          --head:#4f46e5; --head-fg:#fff; --bg:#f8fafc; --maxw:880px;
+          --font:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif; }
   * { box-sizing: border-box; }
-  body { margin:0; background:#f8fafc; color:var(--text); font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif; line-height:1.5; }
-  header { background:var(--main); color:#fff; transition:background .3s; }
-  .wrap { max-width:880px; margin:0 auto; padding:0 16px; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font); line-height:1.5; transition:background .3s; }
+  input, textarea, select, button { font-family:inherit; }
+  header { background:var(--head); color:var(--head-fg); transition:background .3s; }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 16px; }
   header .wrap { display:flex; justify-content:space-between; align-items:center; padding-top:14px; padding-bottom:14px; gap:8px; flex-wrap:wrap; }
-  header h1 { font-size:20px; margin:0; cursor:pointer; }
-  header nav { display:flex; gap:6px; flex-wrap:wrap; }
-  header nav button { background:rgba(255,255,255,.15); color:#fff; border:none; padding:7px 12px; border-radius:8px; font-size:14px; cursor:pointer; font-family:inherit; }
-  header nav button:hover { background:rgba(255,255,255,.25); }
+  header.center .wrap { flex-direction:column; justify-content:center; text-align:center; }
+  .brand { display:flex; align-items:center; gap:10px; cursor:pointer; }
+  header.center .brand { flex-direction:column; gap:6px; }
+  .brand img { height:42px; max-width:160px; object-fit:contain; border-radius:6px; background:rgba(255,255,255,.9); padding:2px; }
+  header.center .brand img { height:56px; }
+  .brand h1 { font-size:20px; margin:0; line-height:1.3; }
+  .brand .bsub { font-size:13px; opacity:.85; }
+  header nav { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+  header nav button { background:rgba(127,127,127,.18); color:inherit; border:none; padding:7px 12px; border-radius:8px; font-size:14px; cursor:pointer; }
+  header nav button:hover { background:rgba(127,127,127,.3); }
+  .banner { width:100%; max-height:300px; object-fit:cover; border-radius:16px; display:block; margin-bottom:16px; }
+  .home-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:14px; }
+  .g-card { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
+  .g-card.click { cursor:pointer; } .g-card.click:hover { box-shadow:0 6px 18px rgba(0,0,0,.08); transform:translateY(-2px); }
+  .g-card { transition:all .15s; }
+  .g-band { height:70px; display:flex; align-items:flex-end; padding:10px 14px; color:#fff; font-size:13px; font-weight:700; }
+  .g-body { padding:14px; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .footer-text { color:var(--sub); font-size:13px; white-space:pre-wrap; margin-bottom:8px; }
+  .preview-box { border:2px dashed #cbd5e1; border-radius:14px; padding:16px; background:var(--bg); pointer-events:none; }
+  .seg { display:inline-flex; border:1px solid #cbd5e1; border-radius:10px; overflow:hidden; }
+  .seg button { border:none; background:#fff; padding:8px 14px; cursor:pointer; font-size:14px; }
+  .seg button.on { background:var(--main); color:#fff; }
+  input[type=color] { width:46px; height:38px; border:1px solid #cbd5e1; border-radius:8px; padding:2px; background:#fff; cursor:pointer; }
   main.wrap { padding-top:28px; padding-bottom:60px; }
   .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:16px; }
   h2 { font-size:22px; margin:0 0 6px; }
@@ -95,6 +117,7 @@
   .done .icon { font-size:56px; }
   .hidden { display:none !important; }
   footer { text-align:center; padding:20px; }
+  .f-jua { --font:"Jua",sans-serif; } .f-gowun { --font:"Gowun Dodum",sans-serif; } .f-nanum { --font:"Nanum Gothic",sans-serif; }
   footer a { color:#94a3b8; font-size:13px; text-decoration:none; } footer a:hover { text-decoration:underline; }
   .spinner { width:18px; height:18px; border:3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite; }
   .loading { text-align:center; color:var(--sub); padding:40px; }
@@ -104,12 +127,16 @@
 </head>
 <body>
 
-<header>
+<header id="site-head">
   <div class="wrap">
-    <h1 onclick="goHome()">📊 영재설문 응답 플랫폼</h1>
+    <div class="brand" onclick="goHome()">
+      <span id="brand-logo"></span>
+      <div><h1 id="brand-title"></h1><div class="bsub" id="brand-sub"></div></div>
+    </div>
     <nav id="admin-nav" class="hidden">
       <button onclick="showAdmin()">설문 목록</button>
       <button onclick="showCreator()">+ 새 설문 만들기</button>
+      <button onclick="showSiteEditor()">🎨 사이트 꾸미기</button>
       <button onclick="logout()">로그아웃</button>
     </nav>
   </div>
@@ -117,7 +144,7 @@
 
 <main class="wrap" id="app"><div class="loading">불러오는 중...</div></main>
 
-<footer><a href="#" onclick="showLogin();return false;">관리자</a></footer>
+<footer><div class="footer-text" id="footer-text"></div><a href="#" onclick="showLogin();return false;">관리자</a></footer>
 
 <script>
 /* =========================================================
@@ -135,6 +162,58 @@ const TYPE_NAME = {
 const THEMES = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#65a30d', '#d97706', '#ea580c', '#e11d48', '#db2777', '#7c3aed', '#475569'];
 const DEFAULT_THEME = '#4f46e5';
 const hasOpts = t => t === 'single' || t === 'multiple';
+
+/* ---------------- 사이트 꾸미기 설정 ---------------- */
+const SITE_DEFAULT = {
+  title:'영재설문 응답 플랫폼', icon:'📊', logo:'', subtitle:'',
+  head:'#4f46e5', bg:'#f8fafc', headAlign:'left',
+  font:'default', width:'normal', homeLayout:'list',
+  banner:'', welcome:'참여할 설문을 선택하세요', welcomeSub:'진행 중인 설문에 참여할 수 있어요.', footer:''
+};
+const FONTS = { default:'기본 글꼴', jua:'주아체 (귀여운)', gowun:'고운돋움 (부드러운)', nanum:'나눔고딕 (단정한)' };
+const FONT_URL = {
+  jua:'https://fonts.googleapis.com/css2?family=Jua&display=swap',
+  gowun:'https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap',
+  nanum:'https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap'
+};
+const WIDTHS = { narrow:'720px', normal:'880px', wide:'1100px' };
+let site = Object.assign({}, SITE_DEFAULT);
+let siteImgs = {};
+try { Object.assign(site, JSON.parse(localStorage.getItem('site_cache') || '{}')); } catch (e) {}
+
+function textOn(hex) {   // 배경색에 맞는 글자색 (흰색/검정)
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return (r * 299 + g * 587 + b * 114) / 1000 > 160 ? '#1e293b' : '#ffffff';
+}
+function loadFont(f) {
+  if (!FONT_URL[f] || document.getElementById('font-' + f)) return;
+  const l = document.createElement('link'); l.id = 'font-' + f; l.rel = 'stylesheet'; l.href = FONT_URL[f];
+  document.head.appendChild(l);
+}
+function applySite(s, imgs) {
+  s = s || site; imgs = imgs || siteImgs;
+  const r = document.documentElement.style;
+  r.setProperty('--head', s.head); r.setProperty('--head-fg', textOn(s.head));
+  r.setProperty('--bg', s.bg); r.setProperty('--maxw', WIDTHS[s.width] || WIDTHS.normal);
+  document.body.className = s.font && s.font !== 'default' ? 'f-' + s.font : '';
+  loadFont(s.font);
+  document.getElementById('site-head').className = s.headAlign === 'center' ? 'center' : '';
+  const logo = imgSrc(s.logo, imgs);
+  document.getElementById('brand-logo').innerHTML = logo ? `<img src="${esc(logo)}" alt="">` : '';
+  document.getElementById('brand-title').textContent = (logo ? '' : (s.icon ? s.icon + ' ' : '')) + (s.title || SITE_DEFAULT.title);
+  document.getElementById('brand-sub').textContent = s.subtitle || '';
+  document.getElementById('footer-text').textContent = s.footer || '';
+  document.title = s.title || SITE_DEFAULT.title;
+}
+function useSite(r) {   // 서버 응답에 들어있는 사이트 설정 적용
+  if (!r || !r.site) return;
+  site = Object.assign({}, SITE_DEFAULT, r.site);
+  Object.assign(siteImgs, r.images || {});
+  try { localStorage.setItem('site_cache', JSON.stringify(Object.assign({}, site, { logo:'', banner:'' }))); } catch (e) {}
+  applySite();
+}
+const accentOf = c => (c && textOn(c) === '#ffffff') ? c : DEFAULT_THEME;   // 너무 밝은 색이면 버튼은 기본색
+const accent = () => accentOf(site.head);
 
 async function api(action, data = {}) {
   if (!API_URL || API_URL.indexOf('script.google.com') === -1)
@@ -158,7 +237,7 @@ function shade(hex, amt) {
   return '#' + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 function applyTheme(c) {
-  c = /^#[0-9a-f]{6}$/i.test(c || '') ? c : DEFAULT_THEME;
+  c = /^#[0-9a-f]{6}$/i.test(c || '') ? c : accent();
   const r = document.documentElement.style;
   r.setProperty('--main', c); r.setProperty('--main-d', shade(c, -0.15)); r.setProperty('--soft', shade(c, 0.9));
 }
@@ -190,27 +269,47 @@ function setUrl(q) { history.replaceState(null, '', location.pathname + (q || ''
 /* =========================================================
    참여자 화면
    ========================================================= */
+function homeHtml(s, imgs, surveys, preview) {
+  const open = surveys.filter(x => x.status !== '마감');
+  const banner = imgSrc(s.banner, imgs);
+  const go = x => (!preview && x.status === '진행 중') ? `onclick="openSurvey('${esc(x.id)}')"` : '';
+  let items;
+  if (!open.length) items = `<div class="card sub" style="text-align:center">지금 참여할 수 있는 설문이 없어요.</div>`;
+  else if (s.homeLayout === 'grid') items = `<div class="home-grid">${open.map(x => `
+      <div class="g-card ${x.status === '진행 중' ? 'click' : ''}" ${go(x)}>
+        <div class="g-band" style="background:${esc(x.theme)}">${esc(x.status)}</div>
+        <div class="g-body">
+          <div style="font-weight:700;font-size:17px">${esc(x.title)}</div>
+          <div class="sub">🗓 ${esc(x.start)} ~ ${esc(x.end)}</div>
+          <div style="margin-top:auto">${x.status === '진행 중' ? `<button class="btn btn-main" style="width:100%">참여하기 →</button>` : `<span class="sub">${esc(x.start)}부터 참여 가능</span>`}</div>
+        </div>
+      </div>`).join('')}</div>`;
+  else items = open.map(x => `
+      <div class="list-item ${x.status === '진행 중' ? 'click' : ''}" ${go(x)}>
+        <div class="grow">
+          <div style="font-weight:700;font-size:17px;margin-bottom:6px"><span class="dot" style="background:${esc(x.theme)}"></span>${esc(x.title)} ${badge(x.status)}</div>
+          ${period(x)}
+        </div>
+        ${x.status === '진행 중' ? `<button class="btn btn-main">참여하기 →</button>` : `<span class="sub">${esc(x.start)}부터 참여 가능</span>`}
+      </div>`).join('');
+  return `
+    ${banner ? `<img class="banner" src="${esc(banner)}" alt="">` : ''}
+    ${s.welcome || s.welcomeSub ? `<div class="card" style="${s.headAlign === 'center' ? 'text-align:center' : ''}">
+      ${s.welcome ? `<h2>${esc(s.welcome)}</h2>` : ''}
+      ${s.welcomeSub ? `<p class="sub" style="margin:0;white-space:pre-wrap">${esc(s.welcomeSub)}</p>` : ''}
+    </div>` : ''}
+    ${items}`;
+}
+
 async function goHome() {
   if (isAdmin()) return showAdmin();
-  applyTheme(DEFAULT_THEME);
+  applyTheme();
   setUrl('');
   loading();
   try {
-    const { surveys } = await api('list');
-    const open = surveys.filter(s => s.status !== '마감');
-    app.innerHTML = `
-      <div class="card">
-        <h2>참여할 설문을 선택하세요</h2>
-        <p class="sub" style="margin:0">진행 중인 설문에 참여할 수 있어요.</p>
-      </div>
-      ${open.length ? open.map(s => `
-        <div class="list-item ${s.status === '진행 중' ? 'click' : ''}" ${s.status === '진행 중' ? `onclick="openSurvey('${esc(s.id)}')"` : ''}>
-          <div class="grow">
-            <div style="font-weight:700;font-size:17px;margin-bottom:6px"><span class="dot" style="background:${esc(s.theme)}"></span>${esc(s.title)} ${badge(s.status)}</div>
-            ${period(s)}
-          </div>
-          ${s.status === '진행 중' ? `<button class="btn btn-main">참여하기 →</button>` : `<span class="sub">${esc(s.start)}부터 참여 가능</span>`}
-        </div>`).join('') : `<div class="card sub" style="text-align:center">지금 참여할 수 있는 설문이 없어요.</div>`}`;
+    const r = await api('list');
+    useSite(r); applyTheme();
+    app.innerHTML = homeHtml(site, siteImgs, r.surveys);
   } catch (e) { app.innerHTML = errBox(e.message); }
 }
 
@@ -223,6 +322,7 @@ async function openSurvey(id) {
   loading();
   try {
     const r = await api('get', { id });
+    useSite(r);
     current = r.survey; currentImgs = r.images || {}; who = null;
     applyTheme(current.theme);
     renderIntro();
@@ -349,7 +449,7 @@ async function submitSurvey() {
    ========================================================= */
 function showLogin() {
   if (isAdmin()) return showAdmin();
-  applyTheme(DEFAULT_THEME);
+  applyTheme();
   setUrl('?admin');
   app.innerHTML = `
     <div class="card" style="max-width:420px;margin:40px auto">
@@ -399,13 +499,16 @@ async function copyLink(id, btn) {
 }
 
 // 설문 목록
+let lastSurveys = [];
 async function showAdmin() {
   if (!isAdmin()) return showLogin();
-  applyTheme(DEFAULT_THEME);
+  applyTheme();
   setUrl('?admin');
   loading();
   try {
-    const { surveys } = await adminApi('adminList');
+    const r = await adminApi('adminList');
+    useSite(r); applyTheme();
+    const surveys = lastSurveys = r.surveys;
     app.innerHTML = `
       <div class="card row" style="justify-content:space-between">
         <div><h2>내가 만든 설문</h2><p class="sub" style="margin:0">설문 링크를 복사해서 참여자에게 보내세요. 결과는 관리자만 볼 수 있어요.</p></div>
@@ -504,12 +607,12 @@ function compressImage(file) {
     fr.readAsDataURL(file);
   });
 }
-function pickImage(onDone) {
+function pickImage(onDone, after) {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/*';
   inp.onchange = async () => {
     if (!inp.files[0]) return;
-    try { onDone(await compressImage(inp.files[0])); renderCreator(); }
+    try { onDone(await compressImage(inp.files[0])); (after || renderCreator)(); }
     catch (e) { alert(e.message); }
   };
   inp.click();
@@ -641,7 +744,7 @@ async function saveSurvey() {
   try {
     const { id } = await adminApi(editing ? 'update' : 'create', { survey: d });
     draft = null; draftImgs = {};
-    applyTheme(DEFAULT_THEME);
+    applyTheme();
     app.innerHTML = `
       <div class="card done">
         <div class="icon">${editing ? '✏️' : '🎉'}</div>
@@ -656,6 +759,138 @@ async function saveSurvey() {
       </div>`;
     window.scrollTo(0, 0);
   } catch (e) { busy(btn, false); msg.innerHTML = errBox(e.message); }
+}
+
+/* ---------------- 사이트 꾸미기 (관리자) ---------------- */
+let siteDraft = null;
+const HEAD_COLORS = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#65a30d', '#d97706', '#ea580c', '#e11d48', '#db2777', '#7c3aed', '#1e293b', '#ffffff'];
+const BG_COLORS = ['#f8fafc', '#ffffff', '#fffbeb', '#fef2f2', '#f0fdf4', '#eff6ff', '#faf5ff', '#fdf2f8', '#f1f5f9'];
+const SAMPLE = [
+  { id:'a', title:'예시) 영재캠프 만족도 조사', start:'2026-11-10', end:'2026-11-17', status:'진행 중', theme:'#059669' },
+  { id:'b', title:'예시) 2학기 수업 의견 조사', start:'2026-12-01', end:'2026-12-10', status:'예정', theme:'#d97706' }
+];
+
+function showSiteEditor() {
+  if (!isAdmin()) return showLogin();
+  setUrl('?admin');
+  siteDraft = Object.assign({}, site);
+  renderSiteEditor();
+  window.scrollTo(0, 0);
+}
+
+function sd(k, v, rerender) {   // 설정 바꾸고 바로 미리보기
+  siteDraft[k] = v;
+  applySite(siteDraft); applyTheme(accentOf(siteDraft.head));
+  if (rerender) renderSiteEditor();
+  else { const p = document.getElementById('home-preview'); if (p) p.innerHTML = previewHtml(); }
+}
+function previewHtml() {
+  const list = lastSurveys.filter(x => x.status !== '마감').length ? lastSurveys : SAMPLE;
+  return homeHtml(siteDraft, siteImgs, list, true);
+}
+function seg(key, opts) {
+  return `<div class="seg">${Object.entries(opts).map(([v, l]) =>
+    `<button class="${siteDraft[key] === v ? 'on' : ''}" onclick="sd('${key}','${v}',true)">${l}</button>`).join('')}</div>`;
+}
+function colorRow(key, list) {
+  return `<div class="row">
+    <div class="swatches">${list.map(c => `<span class="swatch ${siteDraft[key] === c ? 'on' : ''}" style="background:${c}" onclick="sd('${key}','${c}',true)"></span>`).join('')}</div>
+    <input type="color" value="${esc(siteDraft[key])}" title="직접 고르기" onchange="sd('${key}',this.value,true)">
+  </div>`;
+}
+function pickSiteImg(key) {
+  pickImage(u => { siteDraft[key] = u; siteImgs[u] = u; }, () => { applySite(siteDraft); renderSiteEditor(); });
+}
+
+function renderSiteEditor() {
+  const d = siteDraft;
+  applySite(d); applyTheme(accentOf(d.head));
+  const imgBox = (key, label) => {
+    const src = imgSrc(d[key], siteImgs);
+    return `<div class="img-edit">
+      ${src ? `<img src="${esc(src)}" alt="">` : ''}
+      <button class="btn btn-line btn-sm" onclick="pickSiteImg('${key}')">🖼 ${src ? '사진 바꾸기' : label}</button>
+      ${src ? `<button class="btn btn-red btn-sm" onclick="sd('${key}','',true)">사진 빼기</button>` : ''}
+    </div>`;
+  };
+  app.innerHTML = `
+    <div class="card">
+      <h2>🎨 사이트 꾸미기</h2>
+      <p class="sub" style="margin:0">바꾸는 내용이 화면에 바로 미리 보여요. <b>저장하기</b>를 눌러야 모든 사람에게 적용돼요.</p>
+    </div>
+
+    <div class="card">
+      <h3>① 사이트 이름</h3>
+      <div class="row">
+        <div style="width:90px"><label class="f" style="margin-top:0">아이콘</label>
+          <input type="text" value="${esc(d.icon)}" maxlength="8" oninput="sd('icon',this.value)" placeholder="📊" style="text-align:center"></div>
+        <div class="grow"><label class="f" style="margin-top:0">사이트 제목</label>
+          <input type="text" value="${esc(d.title)}" maxlength="60" oninput="sd('title',this.value)" placeholder="예: OO교육지원청 영재교육원 설문"></div>
+      </div>
+      <label class="f">작은 부제목 <span class="sub" style="font-weight:400">(제목 아래 작게)</span></label>
+      <input type="text" value="${esc(d.subtitle)}" maxlength="100" oninput="sd('subtitle',this.value)" placeholder="예: 2026학년도 초등 영재학급">
+      <label class="f">로고 사진 <span class="sub" style="font-weight:400">(넣으면 아이콘 대신 보여요)</span></label>
+      ${imgBox('logo', '로고 넣기')}
+    </div>
+
+    <div class="card">
+      <h3>② 색과 글꼴</h3>
+      <label class="f" style="margin-top:0">맨 위 띠 색 <span class="sub" style="font-weight:400">(버튼 색도 같이 바뀌어요)</span></label>
+      ${colorRow('head', HEAD_COLORS)}
+      <label class="f">배경 색</label>
+      ${colorRow('bg', BG_COLORS)}
+      <label class="f">글꼴</label>
+      ${seg('font', FONTS)}
+    </div>
+
+    <div class="card">
+      <h3>③ 레이아웃</h3>
+      <label class="f" style="margin-top:0">제목 위치</label>
+      ${seg('headAlign', { left:'왼쪽', center:'가운데' })}
+      <label class="f">화면 너비</label>
+      ${seg('width', { narrow:'좁게', normal:'보통', wide:'넓게' })}
+      <label class="f">첫 화면 설문 목록 모양</label>
+      ${seg('homeLayout', { list:'☰ 한 줄씩 (목록형)', grid:'▦ 바둑판 (카드형)' })}
+    </div>
+
+    <div class="card">
+      <h3>④ 첫 화면</h3>
+      <label class="f" style="margin-top:0">배너 사진 <span class="sub" style="font-weight:400">(첫 화면 맨 위에 크게)</span></label>
+      ${imgBox('banner', '배너 사진 넣기')}
+      <label class="f">환영 문구</label>
+      <input type="text" value="${esc(d.welcome)}" maxlength="100" oninput="sd('welcome',this.value)" placeholder="예: 영재교육원 설문에 오신 것을 환영합니다">
+      <label class="f">안내 문구</label>
+      <textarea class="small" maxlength="300" oninput="sd('welcomeSub',this.value)" placeholder="예: 진행 중인 설문을 눌러 참여해 주세요.">${esc(d.welcomeSub)}</textarea>
+      <label class="f">맨 아래 문구 <span class="sub" style="font-weight:400">(학교 이름, 문의처 등)</span></label>
+      <textarea class="small" maxlength="300" oninput="sd('footer',this.value)" placeholder="예: OO초등학교 영재학급 · 문의 051-000-0000">${esc(d.footer)}</textarea>
+    </div>
+
+    <div class="card">
+      <h3>👀 첫 화면 미리보기</h3>
+      <div class="preview-box" id="home-preview">${previewHtml()}</div>
+    </div>
+
+    <div id="site-msg"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-gray" onclick="if(confirm('기본 디자인으로 되돌릴까요? (저장해야 적용돼요)')){siteDraft=Object.assign({},SITE_DEFAULT);renderSiteEditor();}">기본값으로</button>
+      <button class="btn btn-gray grow" onclick="cancelSite()">취소</button>
+      <button class="btn btn-main grow" id="site-btn" onclick="saveSite()">저장하기</button>
+    </div>`;
+}
+
+function cancelSite() { siteDraft = null; applySite(); showAdmin(); }
+
+async function saveSite() {
+  const btn = document.getElementById('site-btn');
+  busy(btn, true, '저장 중...');
+  try {
+    const r = await adminApi('saveSite', { site: siteDraft });
+    // 새로 올린 사진을 서버 주소(img:..)로 바꿔 기억
+    ['logo', 'banner'].forEach(k => { if (String(siteDraft[k]).startsWith('data:')) siteImgs[r.site[k]] = siteDraft[k]; });
+    useSite({ site: r.site, images: {} });
+    siteDraft = null;
+    showAdmin();
+  } catch (e) { busy(btn, false); document.getElementById('site-msg').innerHTML = errBox(e.message); }
 }
 
 /* ---------------- 결과 보기 (관리자만) ---------------- */
@@ -673,7 +908,7 @@ function bars(entries, n, cls) {
 
 async function showResults(id) {
   if (!isAdmin()) return showLogin();
-  applyTheme(DEFAULT_THEME);
+  applyTheme();
   loading('결과를 불러오는 중...');
   try {
     const r = await adminApi('results', { id });
@@ -737,6 +972,7 @@ function downloadCsv() {
 
 /* ---------------- 시작 ---------------- */
 (function init() {
+  applySite(); applyTheme();
   syncNav();
   const p = new URLSearchParams(location.search);
   if (p.get('s')) openSurvey(p.get('s'));
