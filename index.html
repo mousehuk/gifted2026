@@ -1,51 +1,580 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>설문 조사 플랫폼</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영재설문 응답 플랫폼</title>
+<style>
+  :root { --main:#4f46e5; --main-d:#4338ca; --soft:#eef2ff; --line:#e2e8f0; --text:#1e293b; --sub:#64748b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#f8fafc; color:var(--text); font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif; line-height:1.5; }
+  header { background:var(--main); color:#fff; }
+  .wrap { max-width:880px; margin:0 auto; padding:0 16px; }
+  header .wrap { display:flex; justify-content:space-between; align-items:center; padding-top:14px; padding-bottom:14px; gap:8px; flex-wrap:wrap; }
+  header h1 { font-size:20px; margin:0; cursor:pointer; }
+  header nav { display:flex; gap:6px; }
+  header nav button { background:rgba(255,255,255,.15); color:#fff; border:none; padding:7px 12px; border-radius:8px; font-size:14px; cursor:pointer; font-family:inherit; }
+  header nav button:hover { background:rgba(255,255,255,.25); }
+  main.wrap { padding-top:28px; padding-bottom:60px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:16px; }
+  h2 { font-size:22px; margin:0 0 6px; }
+  h3 { font-size:17px; margin:0 0 12px; }
+  .sub { color:var(--sub); font-size:14px; }
+  label.f { display:block; font-weight:600; font-size:14px; margin:14px 0 6px; }
+  input[type=text], input[type=password], input[type=date], textarea, select {
+    width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; font-family:inherit; background:#fff;
+  }
+  textarea { min-height:90px; resize:vertical; }
+  input:focus, textarea:focus, select:focus { outline:none; border-color:var(--main); box-shadow:0 0 0 3px rgba(79,70,229,.2); }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 16px; border-radius:10px; border:1px solid transparent; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .btn-main { background:var(--main); color:#fff; } .btn-main:hover { background:var(--main-d); }
+  .btn-main:disabled { background:#a5b4fc; cursor:not-allowed; }
+  .btn-line { background:#fff; color:var(--main); border-color:var(--main); } .btn-line:hover { background:var(--soft); }
+  .btn-gray { background:#f1f5f9; color:#334155; } .btn-gray:hover { background:#e2e8f0; }
+  .btn-red { background:#fff; color:#dc2626; border-color:#fecaca; } .btn-red:hover { background:#fef2f2; }
+  .btn-sm { padding:6px 10px; font-size:13px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .grow { flex:1; min-width:160px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+  .b-on { background:#dcfce7; color:#15803d; } .b-wait { background:#fef9c3; color:#a16207; } .b-off { background:#f1f5f9; color:#64748b; }
+  .period { display:inline-flex; gap:6px; align-items:center; background:var(--soft); color:var(--main-d); padding:6px 12px; border-radius:8px; font-size:14px; font-weight:600; }
+  .list-item { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff; flex-wrap:wrap; }
+  .list-item.click { cursor:pointer; } .list-item.click:hover { border-color:var(--main); background:#fafaff; }
+  .msg { padding:12px 14px; border-radius:10px; font-size:14px; margin-top:14px; }
+  .msg-err { background:#fee2e2; color:#b91c1c; } .msg-ok { background:#dcfce7; color:#15803d; } .msg-info { background:var(--soft); color:var(--main-d); }
+  .q { border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:12px; background:#fff; }
+  .q-title { font-weight:700; margin-bottom:10px; }
+  .req { color:#dc2626; margin-left:2px; }
+  .opt { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer; }
+  .opt:hover { background:#f8fafc; }
+  .opt input { width:18px; height:18px; accent-color:var(--main); }
+  .edit-opt { display:flex; gap:8px; margin-bottom:8px; }
+  .bar-row { display:grid; grid-template-columns: 140px 1fr 70px; gap:10px; align-items:center; margin-bottom:8px; font-size:14px; }
+  .bar-bg { background:#f1f5f9; border-radius:6px; height:22px; overflow:hidden; }
+  .bar { background:var(--main); height:100%; border-radius:6px; }
+  .answers { max-height:260px; overflow:auto; border:1px solid var(--line); border-radius:10px; }
+  .answers div { padding:8px 12px; border-bottom:1px solid #f1f5f9; font-size:14px; }
+  .answers div:last-child { border-bottom:none; }
+  .answers b { color:var(--sub); font-weight:600; margin-right:6px; }
+  .tbl-wrap { overflow:auto; border:1px solid var(--line); border-radius:10px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  th { background:var(--soft); position:sticky; top:0; }
+  td.wrap-txt { white-space:normal; min-width:180px; }
+  .big { font-size:34px; font-weight:800; color:var(--main); }
+  .done { text-align:center; padding:48px 24px; }
+  .done .icon { font-size:56px; }
+  .hidden { display:none !important; }
+  footer { text-align:center; padding:20px; }
+  footer a { color:#94a3b8; font-size:13px; text-decoration:none; } footer a:hover { text-decoration:underline; }
+  .spinner { width:18px; height:18px; border:3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite; }
+  .loading { text-align:center; color:var(--sub); padding:40px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @media (max-width:560px) { .bar-row { grid-template-columns: 90px 1fr 60px; } }
+</style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800">
+<body>
 
-    <!-- Header -->
-    <header class="bg-indigo-600 text-white shadow-md">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold flex items-center gap-2">
-                📊 영재설문 응답 플랫폼
-            </h1>
-            <div class="space-x-2">
-                <button onclick="switchTab('creator')" id="btn-creator" class="px-3 py-1.5 rounded-lg bg-indigo-700 font-medium text-sm transition">설문 만들기</button>
-                <button onclick="switchTab('taker')" id="btn-taker" class="px-3 py-1.5 rounded-lg bg-indigo-500 font-medium text-sm transition">설문 참여하기</button>
-                <button onclick="switchTab('results')" id="btn-results" class="px-3 py-1.5 rounded-lg bg-indigo-500 font-medium text-sm transition">결과 통계</button>
-                <button onclick="openDeployModal()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 font-medium text-sm transition">깃허브 배포 가이드</button>
-            </div>
+<header>
+  <div class="wrap">
+    <h1 onclick="goHome()">📊 영재설문 응답 플랫폼</h1>
+    <nav id="admin-nav" class="hidden">
+      <button onclick="showAdmin()">설문 목록</button>
+      <button onclick="showCreator()">+ 새 설문 만들기</button>
+      <button onclick="logout()">로그아웃</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"><div class="loading">불러오는 중...</div></main>
+
+<footer><a href="#" onclick="showLogin();return false;">관리자</a></footer>
+
+<script>
+/* =========================================================
+   ★ 여기에 Apps Script 웹 앱 주소를 붙여넣으세요 ★
+   (https://script.google.com/macros/s/....../exec)
+   ========================================================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbxgYG8JYBi8eKheaIf5slZH0KmdH2oSHgX0EJXp9T3h0gogiV-rHWwYH8BZuXd2N3KI7A/exec";
+
+/* ---------------- 공통 ---------------- */
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TYPE_NAME = { single:'객관식(하나 선택)', multiple:'객관식(여러 개 선택)', short:'주관식(짧은 답)', long:'주관식(긴 답)' };
+
+async function api(action, data = {}) {
+  if (!API_URL || API_URL.indexOf('script.google.com') === -1)
+    throw new Error('아직 구글 시트와 연결되지 않았어요. index.html 위쪽의 API_URL에 Apps Script 웹 앱 주소를 넣어주세요.');
+  let res;
+  try {
+    res = await fetch(API_URL, { method:'POST', body: JSON.stringify(Object.assign({ action }, data)) });
+  } catch (e) {
+    throw new Error('서버에 연결하지 못했어요. 인터넷 연결이나 웹 앱 배포 설정(액세스: 모든 사용자)을 확인해주세요.');
+  }
+  let j;
+  try { j = await res.json(); } catch (e) { throw new Error('서버 응답을 읽지 못했어요. 웹 앱 주소가 맞는지 확인해주세요.'); }
+  if (!j.ok) throw new Error(j.error || '오류가 발생했어요.');
+  return j;
+}
+
+function badge(st) {
+  const cls = st === '진행 중' ? 'b-on' : st === '예정' ? 'b-wait' : 'b-off';
+  return `<span class="badge ${cls}">${esc(st)}</span>`;
+}
+function period(s) { return `<span class="period">🗓 ${esc(s.start)} ~ ${esc(s.end)}</span>`; }
+function errBox(m) { return `<div class="msg msg-err">${esc(m)}</div>`; }
+function loading(t) { app.innerHTML = `<div class="loading">${esc(t || '불러오는 중...')}</div>`; }
+function busy(btn, on, text) {
+  if (!btn) return;
+  if (on) { btn.dataset.t = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>${esc(text || '처리 중...')}`; }
+  else { btn.disabled = false; btn.innerHTML = btn.dataset.t || btn.innerHTML; }
+}
+
+/* ---------------- 관리자 비밀번호 보관 (이 탭에서만) ---------------- */
+let memPw = '';
+function getPw() { try { return sessionStorage.getItem('admin_pw') || memPw; } catch (e) { return memPw; } }
+function setPw(p) { memPw = p; try { p ? sessionStorage.setItem('admin_pw', p) : sessionStorage.removeItem('admin_pw'); } catch (e) {} }
+function isAdmin() { return !!getPw(); }
+function syncNav() { document.getElementById('admin-nav').classList.toggle('hidden', !isAdmin()); }
+
+function setUrl(q) { history.replaceState(null, '', location.pathname + (q || '')); }
+
+/* =========================================================
+   참여자 화면
+   ========================================================= */
+async function goHome() {
+  if (isAdmin()) return showAdmin();
+  setUrl('');
+  loading();
+  try {
+    const { surveys } = await api('list');
+    const open = surveys.filter(s => s.status !== '마감');
+    app.innerHTML = `
+      <div class="card">
+        <h2>참여할 설문을 선택하세요</h2>
+        <p class="sub">진행 중인 설문에 참여할 수 있어요.</p>
+      </div>
+      ${open.length ? open.map(s => `
+        <div class="list-item ${s.status === '진행 중' ? 'click' : ''}" ${s.status === '진행 중' ? `onclick="openSurvey('${esc(s.id)}')"` : ''}>
+          <div class="grow">
+            <div style="font-weight:700;font-size:17px;margin-bottom:6px">${esc(s.title)} ${badge(s.status)}</div>
+            ${period(s)}
+          </div>
+          ${s.status === '진행 중' ? `<button class="btn btn-main">참여하기 →</button>` : `<span class="sub">${esc(s.start)}부터 참여 가능</span>`}
+        </div>`).join('') : `<div class="card sub" style="text-align:center">지금 참여할 수 있는 설문이 없어요.</div>`}`;
+  } catch (e) { app.innerHTML = errBox(e.message); }
+}
+
+let current = null;   // 지금 응답 중인 설문
+let who = null;       // { org, name }
+
+async function openSurvey(id) {
+  setUrl('?s=' + encodeURIComponent(id));
+  loading();
+  try {
+    const { survey } = await api('get', { id });
+    current = survey; who = null;
+    renderIntro();
+  } catch (e) { app.innerHTML = errBox(e.message); }
+}
+
+function surveyHead(s) {
+  return `
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">${esc(s.title)}</h2>${badge(s.status)}
+      </div>
+      ${s.desc ? `<p class="sub" style="white-space:pre-wrap;margin:10px 0 12px">${esc(s.desc)}</p>` : '<div style="height:12px"></div>'}
+      ${period(s)}
+    </div>`;
+}
+
+// 1단계: 소속 / 이름
+function renderIntro() {
+  const s = current;
+  if (s.status !== '진행 중') {
+    app.innerHTML = surveyHead(s) + `<div class="card" style="text-align:center">
+      ${s.status === '예정' ? `아직 설문 기간이 아니에요.<br><b>${esc(s.start)}</b>부터 참여할 수 있어요.` : `설문 기간이 끝났어요. (${esc(s.end)} 마감)`}</div>`;
+    return;
+  }
+  app.innerHTML = surveyHead(s) + `
+    <div class="card">
+      <h3>응답자 정보</h3>
+      <p class="sub" style="margin-top:-6px">설문을 시작하기 전에 소속과 이름을 입력해주세요.</p>
+      <label class="f">소속 <span class="req">*</span></label>
+      <input type="text" id="in-org" placeholder="예: OO초등학교 5학년 3반" value="${esc(who?.org || '')}">
+      <label class="f">이름 <span class="req">*</span></label>
+      <input type="text" id="in-name" placeholder="예: 홍길동" value="${esc(who?.name || '')}">
+      <div id="intro-msg"></div>
+      <div style="margin-top:18px"><button class="btn btn-main" style="width:100%" onclick="startSurvey()">설문 시작하기 →</button></div>
+    </div>`;
+}
+
+function startSurvey() {
+  const org = document.getElementById('in-org').value.trim();
+  const name = document.getElementById('in-name').value.trim();
+  if (!org || !name) { document.getElementById('intro-msg').innerHTML = errBox('소속과 이름을 모두 입력해주세요.'); return; }
+  who = { org, name };
+  renderQuestions();
+}
+
+// 2단계: 질문 응답
+function renderQuestions() {
+  const s = current;
+  app.innerHTML = surveyHead(s) + `
+    <div class="card" style="padding:14px 20px">
+      <span class="sub">응답자</span> <b>${esc(who.org)} · ${esc(who.name)}</b>
+      <button class="btn btn-gray btn-sm" style="float:right" onclick="renderIntro()">수정</button>
+    </div>
+    ${s.questions.map((q, i) => `
+      <div class="q" id="q-${i}">
+        <div class="q-title">${i + 1}. ${esc(q.text)}${q.required ? '<span class="req">*</span>' : ''}
+          ${q.type === 'multiple' ? '<span class="sub" style="font-weight:400"> (여러 개 선택 가능)</span>' : ''}</div>
+        ${q.type === 'single' || q.type === 'multiple'
+          ? q.options.map(o => `<label class="opt"><input type="${q.type === 'single' ? 'radio' : 'checkbox'}" name="a-${i}" value="${esc(o)}"> ${esc(o)}</label>`).join('')
+          : q.type === 'short'
+            ? `<input type="text" name="a-${i}" placeholder="답변을 입력하세요">`
+            : `<textarea name="a-${i}" placeholder="답변을 입력하세요"></textarea>`}
+      </div>`).join('')}
+    <div id="submit-msg"></div>
+    <button class="btn btn-main" id="submit-btn" style="width:100%;margin-top:8px;padding:14px" onclick="submitSurvey()">제출하기</button>`;
+}
+
+async function submitSurvey() {
+  const s = current, msg = document.getElementById('submit-msg');
+  msg.innerHTML = '';
+  const answers = [];
+  for (let i = 0; i < s.questions.length; i++) {
+    const q = s.questions[i];
+    let a;
+    if (q.type === 'single') a = (document.querySelector(`input[name="a-${i}"]:checked`) || {}).value || '';
+    else if (q.type === 'multiple') a = [...document.querySelectorAll(`input[name="a-${i}"]:checked`)].map(x => x.value);
+    else a = document.querySelector(`[name="a-${i}"]`).value.trim();
+    const empty = Array.isArray(a) ? a.length === 0 : !a;
+    if (q.required && empty) {
+      msg.innerHTML = errBox(`${i + 1}번 질문에 답해주세요.`);
+      document.getElementById('q-' + i).scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+    answers.push(a);
+  }
+  const btn = document.getElementById('submit-btn');
+  busy(btn, true, '제출 중...');
+  try {
+    await api('submit', { id: s.id, org: who.org, name: who.name, answers });
+    // 제출 후에는 결과를 보여주지 않음
+    app.innerHTML = `
+      <div class="card done">
+        <div class="icon">✅</div>
+        <h2>제출이 완료되었어요</h2>
+        <p class="sub">${esc(who.org)} ${esc(who.name)}님, 설문에 참여해 주셔서 감사합니다.</p>
+      </div>`;
+    current = null; who = null;
+  } catch (e) {
+    busy(btn, false);
+    msg.innerHTML = errBox(e.message);
+  }
+}
+
+/* =========================================================
+   관리자 화면
+   ========================================================= */
+function showLogin() {
+  if (isAdmin()) return showAdmin();
+  setUrl('?admin');
+  app.innerHTML = `
+    <div class="card" style="max-width:420px;margin:40px auto">
+      <h2>관리자 로그인</h2>
+      <p class="sub">설문 만들기와 결과 보기는 관리자만 할 수 있어요.</p>
+      <label class="f">비밀번호</label>
+      <input type="password" id="pw" onkeydown="if(event.key==='Enter')login()">
+      <div id="login-msg"></div>
+      <div class="row" style="margin-top:18px">
+        <button class="btn btn-gray grow" onclick="goHome()">취소</button>
+        <button class="btn btn-main grow" id="login-btn" onclick="login()">로그인</button>
+      </div>
+    </div>`;
+  document.getElementById('pw').focus();
+}
+
+async function login() {
+  const pw = document.getElementById('pw').value;
+  const btn = document.getElementById('login-btn');
+  busy(btn, true, '확인 중...');
+  try {
+    await api('login', { password: pw });
+    setPw(pw); syncNav(); showAdmin();
+  } catch (e) {
+    busy(btn, false);
+    document.getElementById('login-msg').innerHTML = errBox(e.message);
+  }
+}
+
+function logout() { setPw(''); syncNav(); goHome(); }
+
+async function adminApi(action, data = {}) {
+  try { return await api(action, Object.assign({ password: getPw() }, data)); }
+  catch (e) {
+    if (/비밀번호/.test(e.message)) { setPw(''); syncNav(); }
+    throw e;
+  }
+}
+
+function surveyLink(id) { return location.origin + location.pathname + '?s=' + encodeURIComponent(id); }
+
+async function copyLink(id, btn) {
+  const link = surveyLink(id);
+  try { await navigator.clipboard.writeText(link); }
+  catch (e) { prompt('아래 링크를 복사하세요', link); return; }
+  const t = btn.innerHTML; btn.innerHTML = '✔ 복사됨'; setTimeout(() => btn.innerHTML = t, 1500);
+}
+
+// 설문 목록
+async function showAdmin() {
+  if (!isAdmin()) return showLogin();
+  setUrl('?admin');
+  loading();
+  try {
+    const { surveys } = await adminApi('adminList');
+    app.innerHTML = `
+      <div class="card row" style="justify-content:space-between">
+        <div><h2>내가 만든 설문</h2><p class="sub" style="margin:0">설문 링크를 복사해서 참여자에게 보내세요. 결과는 관리자만 볼 수 있어요.</p></div>
+        <button class="btn btn-main" onclick="showCreator()">+ 새 설문 만들기</button>
+      </div>
+      ${surveys.length ? surveys.slice().reverse().map(s => `
+        <div class="list-item">
+          <div class="grow">
+            <div style="font-weight:700;font-size:17px;margin-bottom:6px">${esc(s.title)} ${badge(s.status)}</div>
+            <div class="row">${period(s)}<span class="sub">응답 <b style="color:var(--text)">${s.count}</b>명</span></div>
+          </div>
+          <div class="row">
+            <button class="btn btn-line btn-sm" onclick="copyLink('${esc(s.id)}', this)">🔗 링크 복사</button>
+            <button class="btn btn-main btn-sm" onclick="showResults('${esc(s.id)}')">📊 결과 보기</button>
+            <button class="btn btn-red btn-sm" onclick="deleteSurvey('${esc(s.id)}', this)">삭제</button>
+          </div>
+        </div>`).join('') : `<div class="card sub" style="text-align:center">아직 만든 설문이 없어요.</div>`}`;
+  } catch (e) {
+    app.innerHTML = errBox(e.message);
+    if (!isAdmin()) setTimeout(showLogin, 1200);
+  }
+}
+
+async function deleteSurvey(id, btn) {
+  if (!confirm('이 설문을 목록에서 삭제할까요?\n(이미 받은 응답은 구글 시트 탭에 그대로 남아 있어요)')) return;
+  busy(btn, true, '삭제 중');
+  try { await adminApi('delete', { id }); showAdmin(); }
+  catch (e) { busy(btn, false); alert(e.message); }
+}
+
+/* ---------------- 설문 만들기 ---------------- */
+let draft = null;
+
+function today() {
+  const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+function addDays(n) {
+  const d = new Date(); d.setDate(d.getDate() + n); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+
+function showCreator() {
+  if (!isAdmin()) return showLogin();
+  setUrl('?admin');
+  draft = { title:'', desc:'', start: today(), end: addDays(7), questions: [] };
+  addQ('single', true);
+  renderCreator();
+}
+
+function addQ(type, silent) {
+  draft.questions.push({ type, text:'', options: (type === 'single' || type === 'multiple') ? ['', ''] : [], required: true });
+  if (!silent) renderCreator(true);
+}
+
+function renderCreator(scrollEnd) {
+  app.innerHTML = `
+    <div class="card">
+      <h2>새 설문 만들기</h2>
+      <p class="sub" style="margin:0">저장하면 설문 내용이 고정되어 더 이상 수정할 수 없어요.</p>
+      <label class="f">설문 제목 <span class="req">*</span></label>
+      <input type="text" value="${esc(draft.title)}" oninput="draft.title=this.value" placeholder="예: 2026 초등영재교육 프로그램 만족도 조사">
+      <label class="f">설문 설명</label>
+      <textarea oninput="draft.desc=this.value" placeholder="설문 안내 말씀을 적어주세요.">${esc(draft.desc)}</textarea>
+      <div class="row">
+        <div class="grow"><label class="f">시작일 <span class="req">*</span></label>
+          <input type="date" value="${esc(draft.start)}" onchange="draft.start=this.value"></div>
+        <div class="grow"><label class="f">종료일 <span class="req">*</span></label>
+          <input type="date" value="${esc(draft.end)}" onchange="draft.end=this.value"></div>
+      </div>
+      <p class="sub" style="margin:8px 0 0">참여자는 시작일부터 종료일까지(종료일 포함) 응답할 수 있어요.</p>
+    </div>
+
+    ${draft.questions.map((q, i) => `
+      <div class="q">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px">
+          <b>질문 ${i + 1}</b>
+          <div class="row">
+            <select style="width:auto" onchange="changeType(${i}, this.value)">
+              ${Object.keys(TYPE_NAME).map(t => `<option value="${t}" ${q.type === t ? 'selected' : ''}>${TYPE_NAME[t]}</option>`).join('')}
+            </select>
+            <label class="sub" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+              <input type="checkbox" ${q.required ? 'checked' : ''} onchange="draft.questions[${i}].required=this.checked"> 필수</label>
+            <button class="btn btn-gray btn-sm" title="위로" onclick="moveQ(${i},-1)" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button class="btn btn-gray btn-sm" title="아래로" onclick="moveQ(${i},1)" ${i === draft.questions.length - 1 ? 'disabled' : ''}>↓</button>
+            <button class="btn btn-red btn-sm" onclick="removeQ(${i})">삭제</button>
+          </div>
         </div>
-    </header>
+        <input type="text" value="${esc(q.text)}" oninput="draft.questions[${i}].text=this.value" placeholder="질문 내용을 입력하세요">
+        ${q.type === 'single' || q.type === 'multiple' ? `
+          <div style="margin-top:12px">
+            ${q.options.map((o, j) => `
+              <div class="edit-opt">
+                <span style="padding-top:10px;color:var(--sub)">${q.type === 'single' ? '○' : '☐'}</span>
+                <input type="text" value="${esc(o)}" oninput="draft.questions[${i}].options[${j}]=this.value" placeholder="선택지 ${j + 1}">
+                <button class="btn btn-gray btn-sm" onclick="removeOpt(${i},${j})" ${q.options.length <= 2 ? 'disabled' : ''}>✕</button>
+              </div>`).join('')}
+            <button class="btn btn-line btn-sm" onclick="addOpt(${i})">+ 선택지 추가</button>
+          </div>` : `<p class="sub" style="margin:10px 0 0">참여자가 ${q.type === 'short' ? '짧은 글' : '긴 글'}로 답해요.</p>`}
+      </div>`).join('')}
 
-    <main class="max-w-5xl mx-auto px-4 py-8">
+    <div class="row" style="margin-bottom:20px">
+      <button class="btn btn-line" onclick="addQ('single')">+ 객관식(하나)</button>
+      <button class="btn btn-line" onclick="addQ('multiple')">+ 객관식(여러 개)</button>
+      <button class="btn btn-line" onclick="addQ('short')">+ 주관식(짧은 답)</button>
+      <button class="btn btn-line" onclick="addQ('long')">+ 주관식(긴 답)</button>
+    </div>
 
-        <!-- 1. Creator Tab -->
-        <section id="tab-creator" class="space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold mb-4 text-indigo-600">새로운 설문지 작성하기</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">설문 제목</label>
-                        <input type="text" id="survey-title" class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="예: 2026 초등영재교육 프로그램 만족도 조사">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">설문 설명</label>
-                        <textarea id="survey-desc" class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="설문에 대한 안내 말씀을 작성해주세요."></textarea>
-                    </div>
-                </div>
-            </div>
+    <div id="create-msg"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-gray grow" onclick="showAdmin()">취소</button>
+      <button class="btn btn-main grow" id="create-btn" onclick="saveSurvey()">설문 저장하고 고정하기</button>
+    </div>`;
+  if (scrollEnd) window.scrollTo(0, document.body.scrollHeight);
+}
 
-            <div id="questions-container" class="space-y-4">
-                <!-- 질문들이 동적으로 추가되는 영역 -->
-            </div>
+function changeType(i, t) {
+  const q = draft.questions[i];
+  q.type = t;
+  if ((t === 'single' || t === 'multiple') && q.options.length < 2) q.options = ['', ''];
+  renderCreator();
+}
+function moveQ(i, d) { const a = draft.questions; [a[i], a[i + d]] = [a[i + d], a[i]]; renderCreator(); }
+function removeQ(i) { draft.questions.splice(i, 1); renderCreator(); }
+function addOpt(i) { draft.questions[i].options.push(''); renderCreator(); }
+function removeOpt(i, j) { draft.questions[i].options.splice(j, 1); renderCreator(); }
 
-            <div class="flex gap-3">
-                <button onclick="addQuestion('single')" class="px-4 py-2 bg-white border border-indigo-600 text-indigo-600 rounded-xl font-medium hover:bg-indigo-50 transition">+ 객관식(단일)</button>
-                <button onclick="addQuestion('multiple')" class="px-4 py-2 bg-white border border-indigo-600 text-indigo-600 rounded-xl
+async function saveSurvey() {
+  const msg = document.getElementById('create-msg');
+  const d = draft;
+  let err = '';
+  if (!d.title.trim()) err = '설문 제목을 입력해주세요.';
+  else if (!d.start || !d.end) err = '시작일과 종료일을 입력해주세요.';
+  else if (d.start > d.end) err = '종료일이 시작일보다 빠를 수 없어요.';
+  else if (!d.questions.length) err = '질문을 1개 이상 추가해주세요.';
+  else for (let i = 0; i < d.questions.length; i++) {
+    const q = d.questions[i];
+    if (!q.text.trim()) { err = `${i + 1}번 질문 내용을 입력해주세요.`; break; }
+    if ((q.type === 'single' || q.type === 'multiple') && q.options.filter(o => o.trim()).length < 2) { err = `${i + 1}번 질문의 선택지를 2개 이상 입력해주세요.`; break; }
+  }
+  if (err) { msg.innerHTML = errBox(err); return; }
+  if (!confirm(`설문을 저장할까요?\n\n저장하면 내용을 수정할 수 없어요.\n기간: ${d.start} ~ ${d.end}`)) return;
+
+  const btn = document.getElementById('create-btn');
+  busy(btn, true, '저장 중...');
+  try {
+    const { id } = await adminApi('create', { survey: d });
+    draft = null;
+    app.innerHTML = `
+      <div class="card done">
+        <div class="icon">🎉</div>
+        <h2>설문이 저장되었어요</h2>
+        <p class="sub">아래 링크를 참여자에게 보내주세요. 구글 시트에도 이 설문의 응답 탭이 만들어졌어요.</p>
+        <input type="text" readonly value="${esc(surveyLink(id))}" onclick="this.select()" style="margin:12px 0;text-align:center">
+        <div class="row" style="justify-content:center">
+          <button class="btn btn-line" onclick="copyLink('${esc(id)}', this)">🔗 링크 복사</button>
+          <button class="btn btn-main" onclick="showAdmin()">설문 목록으로</button>
+        </div>
+      </div>`;
+  } catch (e) { busy(btn, false); msg.innerHTML = errBox(e.message); }
+}
+
+/* ---------------- 결과 보기 (관리자만) ---------------- */
+let lastResult = null;
+
+async function showResults(id) {
+  if (!isAdmin()) return showLogin();
+  loading('결과를 불러오는 중...');
+  try {
+    const r = await adminApi('results', { id });
+    lastResult = r;
+    const s = r.survey, rows = r.rows, n = rows.length;
+
+    const qHtml = s.questions.map((q, i) => {
+      const col = rows.map(row => row[3 + i]).filter(v => String(v).trim() !== '');
+      let body;
+      if (q.type === 'single' || q.type === 'multiple') {
+        const counts = {}; q.options.forEach(o => counts[o] = 0);
+        col.forEach(v => (q.type === 'multiple' ? String(v).split(', ') : [String(v)]).forEach(x => { counts[x] = (counts[x] || 0) + 1; }));
+        const max = Math.max(1, ...Object.values(counts));
+        body = Object.entries(counts).map(([o, c]) => `
+          <div class="bar-row">
+            <div title="${esc(o)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o)}</div>
+            <div class="bar-bg"><div class="bar" style="width:${c / max * 100}%"></div></div>
+            <div><b>${c}</b>명 <span class="sub">${n ? Math.round(c / n * 100) : 0}%</span></div>
+          </div>`).join('');
+      } else {
+        body = col.length ? `<div class="answers">${rows.filter(row => String(row[3 + i]).trim() !== '')
+          .map(row => `<div><b>${esc(row[1])} ${esc(row[2])}</b>${esc(row[3 + i])}</div>`).join('')}</div>`
+          : '<p class="sub">아직 답변이 없어요.</p>';
+      }
+      return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <h3 style="margin:0">${i + 1}. ${esc(q.text)}</h3><span class="badge b-off">응답 ${col.length}건</span></div>${body}</div>`;
+    }).join('');
+
+    app.innerHTML = `
+      <div style="margin-bottom:12px"><a href="#" onclick="showAdmin();return false;" style="color:var(--sub);text-decoration:none">← 설문 목록으로</a></div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div><h2>${esc(s.title)} ${badge(s.status)}</h2>${period(s)}</div>
+          <div class="row">
+            <button class="btn btn-line btn-sm" onclick="copyLink('${esc(s.id)}', this)">🔗 링크 복사</button>
+            <button class="btn btn-gray btn-sm" onclick="downloadCsv()">⬇ CSV 내보내기</button>
+            <button class="btn btn-gray btn-sm" onclick="showResults('${esc(s.id)}')">↻ 새로고침</button>
+          </div>
+        </div>
+      </div>
+      <div class="card row"><div><div class="sub">총 참여 인원</div><div class="big">${n}명</div></div></div>
+      ${n ? qHtml : ''}
+      <div class="card">
+        <h3>응답자별 전체 응답</h3>
+        ${n ? `<div class="tbl-wrap"><table>
+          <tr><th>제출일시</th><th>소속</th><th>이름</th>${s.questions.map((q, i) => `<th>${i + 1}. ${esc(q.text)}</th>`).join('')}</tr>
+          ${rows.map(row => `<tr>${row.map((v, k) => `<td class="${k > 2 ? 'wrap-txt' : ''}">${esc(v)}</td>`).join('')}</tr>`).join('')}
+        </table></div>` : '<p class="sub">아직 응답이 없어요.</p>'}
+      </div>`;
+  } catch (e) { app.innerHTML = errBox(e.message); }
+}
+
+function downloadCsv() {
+  if (!lastResult) return;
+  const s = lastResult.survey;
+  const header = ['제출일시', '소속', '이름'].concat(s.questions.map((q, i) => `${i + 1}. ${q.text}`));
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const csv = '﻿' + [header].concat(lastResult.rows).map(r => r.map(q).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = s.title.replace(/[\\/:*?"<>|]/g, '_') + '_응답.csv';
+  a.click();
+}
+
+/* ---------------- 시작 ---------------- */
+(function init() {
+  syncNav();
+  const p = new URLSearchParams(location.search);
+  if (p.get('s')) openSurvey(p.get('s'));
+  else if (p.has('admin')) showLogin();
+  else goHome();
+})();
+</script>
+</body>
+</html>
